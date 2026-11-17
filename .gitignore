@@ -1,0 +1,27 @@
+# 构建产物
+dist/
+data/
+*.exe
+*.new.exe
+*.old
+TranslatePop.new.exe
+
+# 运行时生成（配置/日志/备份，含本机路径与窗口标题）
+log.txt
+*.log
+*.bak
+config.ini.bak
+
+# 本地调试留档，不入库
+_local/
+tools/edgeprofile/
+tools/chromeprofile/
+
+# 编辑器 / 系统
+.vs/
+.vscode/
+Thumbs.db
+Desktop.ini
+
+# 本地草稿
+idea.txt

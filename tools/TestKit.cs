@@ -348,7 +348,7 @@ internal static class TestKit
     static void Web(string[] args)
     {
         Application.EnableVisualStyles();
-        string url = args.Length > 1 ? args[1] : "D:/imagination/Translate/tools/sample.html";
+        string url = args.Length > 1 ? args[1] : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sample.html");
         Form f = new Form();
         f.Text = "TranslatePop Browser Target";
         f.StartPosition = FormStartPosition.Manual;

@@ -26,6 +26,10 @@ curl http://localhost:8989/health
 # {"status":"ok"} 就绪
 ```
 
+> **这一点很关键**：本仓库里**没有任何翻译模型、词典或联网翻译的代码**，也不内置备用翻译源。没跑 MTranServer 时，程序能选中词、能弹卡片，但卡片上只会显示连接失败。
+>
+> MTranServer 需要你自己按它的[文档](https://github.com/xxnuo/MTranServer)部署（Docker 或直接跑二进制），常驻内存几百 MB —— 代价换来的是速度与隐私：模型常驻本机，一次往返 0.2 秒，译文全程不出机器。
+
 ### 2. 拿到 TranslatePop
 
 - **直接用**：到 [Releases](../../releases) 下载 `TranslatePop.exe`（单文件，无需安装），放到任意目录（例如 `D:\Tools\TranslatePop\`）。
@@ -36,6 +40,7 @@ curl http://localhost:8989/health
 1. 双击 `TranslatePop.exe`。
    - 第一次会弹一次 UAC，点「是」（原因见[为什么需要管理员权限](#为什么需要管理员权限)）。
    - 想以后都不弹：托盘菜单 →「启用静默提权」，之后双击即静默管理员启动。
+   - 如果弹出蓝色的「Windows 已保护你的电脑」：exe 没做代码签名，点「更多信息」→「仍要运行」即可，详见[下载与「未知发布者」](#下载与未知发布者)。
 2. 右下角出现托盘图标，提示文字会显示当前生效的热键。
 3. 在任意窗口选中英文，按 **Alt + `**（反引号，Esc 下面那个键）。
 4. 卡片先显示「翻译中…」，约 0.3 秒后原地换成译文。
@@ -49,6 +54,19 @@ curl http://localhost:8989/health
 | 鼠标移上去 | 暂停自动消失（默认 8 秒后关） |
 | 左键点卡片 | 复制译文到剪贴板，0.7 秒后关 |
 | 右键点卡片 | 立刻关闭 |
+
+## 下载与「未知发布者」
+
+本项目的 exe **没有代码签名**（个人项目，不买证书），所以从网上下来的头几次会遇到下面这些提示，都是正常的：
+
+| 现象 | 原因 | 怎么办 |
+|---|---|---|
+| 浏览器提示「不常下载，可能有危险」 | SmartScreen 对下载量少的文件默认拦一下 | 点「保留」→「仍然保留」 |
+| 运行时「Windows 已保护你的电脑 / 未知发布者」 | exe 无数字签名 | 「更多信息」→「仍要运行」 |
+| 杀软报可疑 / 拦截 | 程序会模拟 `Ctrl+C`、装底层键盘钩子、申请管理员权限 —— 这三样本身就是杀软的敏感行为 | 加白名单，或者**自己编译**对照 |
+| 每次启动都弹 UAC | 默认提权方式是 `runas` | 托盘菜单 →「启用静默提权」（建计划任务，之后不再弹） |
+
+不放心的话**别下 exe**，一条 `build.cmd` 自己编即可，源码全部在 `src\TranslatePop.cs`。
 
 ## 代码模式
 
@@ -191,6 +209,31 @@ install.cmd    :: 部署：结束旧实例、换新版、补配置、建静默�
 
 说明：`build.cmd` 先编到项目根目录再搬进 `dist\`，因为被低完整性标签标记过的 `dist` 目录可能不允许低权限进程直接写入。
 
+## 发布新版本
+
+源码入库、exe 走 Releases（不提交二进制，仓库干净，也免掉杀软对仓库的误判）：
+
+```cmd
+:: 1. 编译
+build.cmd
+
+:: 2. 自检一遍
+dist\TranslatePop.exe --check
+
+:: 3. 提交源码改动
+git add -A
+git commit -m "说明改了什么"
+git push
+
+:: 4. 打 tag
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+然后到 GitHub → **Releases** → Draft a new release → 选刚推的 tag → 上传 `dist\TranslatePop.exe` 作为附件 → Publish。
+
+`.gitignore` 已经排除了 `dist/`、`*.exe`、`log.txt`、`_local/`，正常 `git add -A` 不会误提交二进制与日志。
+
 ## 文件
 
 | 路径 | 说明 |
@@ -205,6 +248,8 @@ install.cmd    :: 部署：结束旧实例、换新版、补配置、建静默�
 | `docs\` | README 用的卡片截图 |
 | `tools\TestKit.cs` | 调试辅助：造置顶窗口、模拟热键、截图、枚举窗口 |
 | `tools\sample.html`、`web-test.html` | 浏览器选词测试页 |
+| `data\config.ini` → 实际生效位置 | 运行时配置模板（首次启动会复制到配置目录） |
+| `LICENSE` | MIT |
 
 运行时生成（不入库）：配置 `config.ini`、日志 `log.txt`、自定义词表 `glossary.txt`，都在配置目录里。
 

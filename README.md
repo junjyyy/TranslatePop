@@ -28,7 +28,7 @@ curl http://localhost:8989/health
 
 ### 2. 拿到 TranslatePop
 
-- **直接用**：到 Releases 下载 `TranslatePop.exe`，放到任意目录（例如 `D:\Tools\TranslatePop\`）。
+- **直接用**：到 [Releases](../../releases) 下载 `TranslatePop.exe`（单文件，无需安装），放到任意目录（例如 `D:\Tools\TranslatePop\`）。
 - **自己编译**：见下面的[构建](#构建)。
 
 ### 3. 运行
